@@ -111,4 +111,4 @@ def lookup(symbol):
 
 def usd(value):
     """Formats value as USD."""
-    return f"${value:,.2f}"
+    return "${:,.2f}".format(value)
