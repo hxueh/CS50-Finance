@@ -31,6 +31,16 @@ try:
 except:
     pass
 
+# Set secure key
+# http://flask.pocoo.org/docs/0.12/quickstart/#sessions
+secretkeypath = mydir + '/secret.txt'
+secretkey = ''
+try:
+    with open(securekeypath, 'r') as f:
+        secretkey = f.readline().strip()
+except:
+    sys.exit(2)
+
 # Configure application
 app = Flask(__name__)
 
@@ -191,9 +201,6 @@ def buy():
         if money < worth:
             return apology("Can't afford")
 
-        # Check if the portfolio database exists, if not, create one
-        # db.execute("CREATE TABLE IF NOT EXISTS \"portfolio\" (\"Transit_id\" INTEGER PRIMARY KEY AUTOINCREMENT, \"Symbol\" TEXT, \"Shares\" INTEGER, \"Time\" TEXT, \"Price\" NUMERIC, \"Action\" TEXT, \"Buyer\" TEXT, FOREIGN KEY (\"Buyer\") REFERENCES \"users\" (\"username\"));")
-
         # Record time and accurate to second
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -273,7 +280,7 @@ def login():
         userexist = db.execute("SELECT * FROM `users` WHERE username = %s", (request.form.get("username"),))
         if userexist == 0:
             return apology("You haven't register", 403)
-
+        
         rows = db.fetchone()
 
         # Ensure username exists and password is correct
@@ -509,18 +516,10 @@ def errorhandler(e):
     """Handle error"""
     return apology(e.name, e.code)
 
-
 # listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
 
 if __name__ == "__main__":
-    mysecurekeypath = mydir + '/secure.txt'
-    securekey = ''
-    try:
-        with open(mysecurekeypath, 'r') as f:
-            securekey = f.readline().strip()
-    except:
-        sys.exit(2)
-    app.secret_key = securekey
+    app.secret_key = secretkey
     app.run()
