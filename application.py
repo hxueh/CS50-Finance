@@ -36,7 +36,7 @@ except:
 secretkeypath = mydir + '/secret.txt'
 secretkey = ''
 try:
-    with open(securekeypath, 'r') as f:
+    with open(secretkeypath, 'r') as f:
         secretkey = f.readline().strip()
 except:
     sys.exit(2)
