@@ -9,6 +9,10 @@ from decimal import Decimal
 
 from helpers import apology, login_required, lookup, usd
 
+# Put your MySQL password inside quote
+mysqlun = 'root'
+mysqlpw = ''
+
 # Configure application
 app = Flask(__name__)
 
@@ -29,6 +33,33 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+create_user_table = "CREATE TABLE IF NOT EXISTS `users` (\
+`id` int(11) unsigned NOT NULL AUTO_INCREMENT, \
+`username` text NOT NULL, \
+`hash` text NOT NULL, \
+`cash` decimal(10,2) NOT NULL DEFAULT '10000.00', \
+PRIMARY KEY (`id`) \
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;"
+
+create_portfolio_table = "CREATE TABLE IF NOT EXISTS `portfolio` (\
+`transit_id` int(11) NOT NULL AUTO_INCREMENT, \
+`symbol` tinytext NOT NULL, \
+`shares` int(10) unsigned NOT NULL, \
+`time` text NOT NULL, \
+`price` decimal(10,2) NOT NULL, \
+`action` tinytext NOT NULL, \
+`buyer` int(10) unsigned NOT NULL, \
+PRIMARY KEY (`transit_id`), \
+KEY `buyer` (`buyer`), \
+CONSTRAINT `portfolio_ibfk_1` FOREIGN KEY (`buyer`) REFERENCES `users` (`id`) \
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
+cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance', autocommit = True)
+db = cnx.cursor()
+db.execute(create_user_table)
+db.execute(create_portfolio_table)
+db.close()
+cnx.close()
+
 
 @app.route("/")
 @login_required
@@ -42,7 +73,7 @@ def index():
         return apology("Must login")
     
     # Connect to database
-    cnx = connect(host = 'localhost', user = 'root', db = 'cs50_finance')
+    cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance')
     db = cnx.cursor()
 
     # Get my money and my username
@@ -123,7 +154,7 @@ def buy():
         else:
             return apology("Must login")
 
-        cnx = connect(host = 'localhost', user = 'root', db = 'cs50_finance', autocommit = True)
+        cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw, db = 'cs50_finance', autocommit = True)
         db = cnx.cursor()
 
         # Remember the user via user's id and save it's name and money
@@ -133,7 +164,7 @@ def buy():
 
         # Check if we can afford
         price = lookup(request.form.get("symbol"))["price"]
-        worth = price * request.form.get("shares")
+        worth = Decimal(usd(price * int(request.form.get("shares")))[1:].replace(',', '').strip('\''))
         if money < worth:
             return apology("Can't afford")
 
@@ -171,7 +202,7 @@ def history():
         return apology("Must login")
     
     # Connect to database
-    cnx = connect(host = 'localhost', user = 'root', db = 'cs50_finance')
+    cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance')
     db = cnx.cursor()
 
     # Store my exchange history
@@ -212,7 +243,7 @@ def login():
 
         # Start checking
         # Connect to the database first
-        cnx = connect(host = 'localhost', user = 'root', db = 'cs50_finance')
+        cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance')
         db = cnx.cursor()
 
         # Query database for username
@@ -303,7 +334,7 @@ def register():
             return apology("Password don't match")
 
         # Connect to the database
-        cnx = connect(host = 'localhost', user = 'root', db = 'cs50_finance', autocommit = True)
+        cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance', autocommit = True)
         db = cnx.cursor()
 
         # Ensure username was not been taken
@@ -343,7 +374,7 @@ def sell():
         return apology("Must login")
 
     # Connect to the database
-    cnx = connect(host = 'localhost', user = 'root', db = 'cs50_finance', autocommit = True)
+    cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance', autocommit = True)
     db = cnx.cursor()
 
     # Remember the user via user's id and save it's name and money
@@ -398,7 +429,10 @@ def sell():
         db.execute("INSERT INTO `portfolio` (`symbol`, `shares`, `time`, `price`, `action`, `buyer`) VALUES (%s, %s, %s, %s, %s, %s);", (request.form.get("symbol"), request.form.get("shares"), now, lookup(request.form.get("symbol"))["price"], 'Sell', user))
         
         # Update the cash I own now
-        worth = float(float(lookup(request.form.get("symbol"))["price"]) * int(request.form.get("shares")))
+        price = Decimal(usd(lookup(request.form.get("symbol"))["price"])[1:].replace(',', '').strip('\''))
+        temp = price * int(request.form.get("shares"))
+        worth = Decimal(usd(temp)[1:].replace(',', '').strip('\''))
+       
         db.execute("UPDATE `users` SET `cash` = (cash + %s) WHERE `id` = %s", (worth, user))
 
         # Close connection
@@ -431,7 +465,7 @@ def password_changing():
             return apology("Password don't match")
 
         # Connect to database
-        cnx = connect(host = 'localhost', user = 'root', db = 'cs50_finance', autocommit = True)
+        cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance', autocommit = True)
         db = cnx.cursor()
 
         # Update the password hash in database
