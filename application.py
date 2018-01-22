@@ -1,4 +1,5 @@
 import sys
+from os import path
 from pymysql import cursors, connect
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
@@ -11,9 +12,10 @@ from decimal import Decimal
 from helpers import apology, login_required, lookup, usd
 
 # Get MySQL username and password
-mysql_db_name, mysql_username, mysql_password = 'cs50_finance', 'root', ''
+mysql_db_name, mysql_username, mysql_password = '', '', ''
+mysqlpath = path.dirname(path.abspath(__file__)) + "/mysql.txt"
 try:    
-    with open('mysql.txt', 'r') as f:
+    with open(mysqlpath, 'r') as f:
         lines = f.readlines()
     try:
         mysql_db_name = lines[0].strip()
@@ -69,7 +71,7 @@ KEY `buyer` (`buyer`), \
 CONSTRAINT `portfolio_ibfk_1` FOREIGN KEY (`buyer`) REFERENCES `users` (`id`) \
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
 try:
-    cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = mysql_db_name, autocommit = True)
+    cnx = connect(host = '127.0.0.1', user = mysql_username, password = mysql_password,db = mysql_db_name, autocommit = True)
 except:
     print("No database")
     sys.exit(1)
@@ -93,7 +95,7 @@ def index():
         return apology("Must login")
     
     # Connect to database
-    cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = mysql_db_name)
+    cnx = connect(host = '127.0.0.1', user = mysql_username, password = mysql_password, db = mysql_db_name)
     db = cnx.cursor()
 
     # Get my money and my username
@@ -174,7 +176,7 @@ def buy():
         else:
             return apology("Must login")
 
-        cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password, db = mysql_db_name, autocommit = True)
+        cnx = connect(host = '127.0.0.1', user = mysql_username, password = mysql_password, db = mysql_db_name, autocommit = True)
         db = cnx.cursor()
 
         # Remember the user via user's id and save it's name and money
@@ -222,7 +224,7 @@ def history():
         return apology("Must login")
     
     # Connect to database
-    cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = mysql_db_name)
+    cnx = connect(host = '127.0.0.1', user = mysql_username, password = mysql_password,db = mysql_db_name)
     db = cnx.cursor()
 
     # Store my exchange history
@@ -263,15 +265,18 @@ def login():
 
         # Start checking
         # Connect to the database first
-        cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = mysql_db_name)
+        cnx = connect(host = '127.0.0.1', user = mysql_username, password = mysql_password, db = mysql_db_name)
         db = cnx.cursor()
 
         # Query database for username
-        db.execute("SELECT * FROM users WHERE username = %s", (request.form.get("username"),))
+        userexist = db.execute("SELECT * FROM `users` WHERE username = %s", (request.form.get("username"),))
+        if userexist == 0:
+            return apology("You haven't register", 403)
+
         rows = db.fetchone()
 
         # Ensure username exists and password is correct
-        if len(rows) == 0 or not check_password_hash(rows[2], request.form.get("password")):
+        if not check_password_hash(rows[2], request.form.get("password")):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
@@ -354,7 +359,7 @@ def register():
             return apology("Password don't match")
 
         # Connect to the database
-        cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = mysql_db_name, autocommit = True)
+        cnx = connect(host = '127.0.0.1', user = mysql_username, password = mysql_password,db = mysql_db_name, autocommit = True)
         db = cnx.cursor()
 
         # Ensure username was not been taken
@@ -394,7 +399,7 @@ def sell():
         return apology("Must login")
 
     # Connect to the database
-    cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = mysql_db_name, autocommit = True)
+    cnx = connect(host = '127.0.0.1', user = mysql_username, password = mysql_password,db = mysql_db_name, autocommit = True)
     db = cnx.cursor()
 
     # Remember the user via user's id and save it's name and money
@@ -485,7 +490,7 @@ def password_changing():
             return apology("Password don't match")
 
         # Connect to database
-        cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = mysql_db_name, autocommit = True)
+        cnx = connect(host = '127.0.0.1', user = mysql_username, password = mysql_password,db = mysql_db_name, autocommit = True)
         db = cnx.cursor()
 
         # Update the password hash in database

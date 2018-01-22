@@ -1,0 +1,4 @@
+<Files mysql.txt> 
+Order Allow,Deny 
+Deny From All 
+</Files>
