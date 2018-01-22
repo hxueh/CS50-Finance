@@ -30,7 +30,7 @@ yourpassword
 
 If you don't create mysql.txt, the default db, username and password is "cs50_finance", "root" and ""(blank).
 
-### Run the app
+## Run the app
 ```
 python3 application.py
 ```
@@ -44,7 +44,7 @@ $ sudo apt-get install apache2-dev
 $ sudo pip3 install pymysql flask flask_session mod_wsgi
 ```
 
-In /etc/apache2/sites-available, create a conf file. e.g. finance.conf
+In `/etc/apache2/sites-available`, create a conf file. e.g. finance.conf
 Change the below example.com and pathto to your domain and path to the Finance folder.
 
 ```
