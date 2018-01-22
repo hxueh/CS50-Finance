@@ -15,7 +15,7 @@ $ pip3 install -r requirements.txt
 
 $ mysql
 
-$ CREATE DATABASE IF NOT EXIST cs50_finance
+$ CREATE DATABASE IF NOT EXISTS cs50_finance
 ```
 
 Create a mysql.txt file containing your MySQL database name, username and password.
