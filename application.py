@@ -13,7 +13,8 @@ from helpers import apology, login_required, lookup, usd
 
 # Get MySQL username and password
 mysql_db_name, mysql_username, mysql_password = '', '', ''
-mysqlpath = path.dirname(path.abspath(__file__)) + "/mysql.txt"
+mydir = path.dirname(path.abspath(__file__))
+mysqlpath = mydir + "/mysql.txt"
 try:    
     with open(mysqlpath, 'r') as f:
         lines = f.readlines()
@@ -514,4 +515,12 @@ for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
 
 if __name__ == "__main__":
+    mysecurekeypath = mydir + '/secure.txt'
+    securekey = ''
+    try:
+        with open(mysecurekeypath, 'r') as f:
+            securekey = f.readline().strip()
+    except:
+        sys.exit(2)
+    app.secret_key = securekey
     app.run()

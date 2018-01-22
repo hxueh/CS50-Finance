@@ -2,3 +2,5 @@
 __pycache__/
 venv/
 mysql.txt
+secure.txt
+finance.wsgi
