@@ -57,8 +57,6 @@ Change the below example.com and pathto to your domain and path to the Finance f
                 Allow from all
         </Directory>
         <Directory /pathto/Finance>
-                #WSGIProcessGroup finance
-                #WSGIApplicationGroup %{GLOBAL}
                 Order deny,allow
                 Allow from all
         </Directory>
