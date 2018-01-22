@@ -1,3 +1,4 @@
+import sys
 from pymysql import cursors, connect
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
@@ -9,9 +10,19 @@ from decimal import Decimal
 
 from helpers import apology, login_required, lookup, usd
 
-# Put your MySQL password inside quote
-mysqlun = 'root'
-mysqlpw = ''
+# Get MySQL username and password
+mysql_username, mysql_password = 'root', ''
+try:    
+    with open('mysql.txt', 'r') as f:
+        lines = f.readlines()
+
+    mysql_username = lines[0].strip()
+    try:
+        mysql_password = lines[1].strip()
+    except:
+        mysql_password = ''
+except:
+    pass
 
 # Configure application
 app = Flask(__name__)
@@ -53,7 +64,12 @@ PRIMARY KEY (`transit_id`), \
 KEY `buyer` (`buyer`), \
 CONSTRAINT `portfolio_ibfk_1` FOREIGN KEY (`buyer`) REFERENCES `users` (`id`) \
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
-cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance', autocommit = True)
+try:
+    cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = 'cs50_finance', autocommit = True)
+except:
+    print("No database")
+    sys.exit(1)
+
 db = cnx.cursor()
 db.execute(create_user_table)
 db.execute(create_portfolio_table)
@@ -73,7 +89,7 @@ def index():
         return apology("Must login")
     
     # Connect to database
-    cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance')
+    cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = 'cs50_finance')
     db = cnx.cursor()
 
     # Get my money and my username
@@ -154,7 +170,7 @@ def buy():
         else:
             return apology("Must login")
 
-        cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw, db = 'cs50_finance', autocommit = True)
+        cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password, db = 'cs50_finance', autocommit = True)
         db = cnx.cursor()
 
         # Remember the user via user's id and save it's name and money
@@ -202,7 +218,7 @@ def history():
         return apology("Must login")
     
     # Connect to database
-    cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance')
+    cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = 'cs50_finance')
     db = cnx.cursor()
 
     # Store my exchange history
@@ -243,7 +259,7 @@ def login():
 
         # Start checking
         # Connect to the database first
-        cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance')
+        cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = 'cs50_finance')
         db = cnx.cursor()
 
         # Query database for username
@@ -334,7 +350,7 @@ def register():
             return apology("Password don't match")
 
         # Connect to the database
-        cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance', autocommit = True)
+        cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = 'cs50_finance', autocommit = True)
         db = cnx.cursor()
 
         # Ensure username was not been taken
@@ -374,7 +390,7 @@ def sell():
         return apology("Must login")
 
     # Connect to the database
-    cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance', autocommit = True)
+    cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = 'cs50_finance', autocommit = True)
     db = cnx.cursor()
 
     # Remember the user via user's id and save it's name and money
@@ -465,7 +481,7 @@ def password_changing():
             return apology("Password don't match")
 
         # Connect to database
-        cnx = connect(host = 'localhost', user = mysqlun, password = mysqlpw,db = 'cs50_finance', autocommit = True)
+        cnx = connect(host = 'localhost', user = mysql_username, password = mysql_password,db = 'cs50_finance', autocommit = True)
         db = cnx.cursor()
 
         # Update the password hash in database
