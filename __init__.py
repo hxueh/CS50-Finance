@@ -12,7 +12,7 @@ from decimal import Decimal
 from helpers import apology, login_required, lookup, usd
 
 # Get MySQL username and password
-mysql_db_name, mysql_username, mysql_password = '', '', ''
+mysql_db_name, mysql_username, mysql_password = 'cs50_finance', 'root', ''
 mydir = path.dirname(path.abspath(__file__))
 mysqlpath = mydir + "/../mysql.txt"
 try:    
